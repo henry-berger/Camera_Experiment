@@ -1,0 +1,41 @@
+if True: # just so I can indent
+        imports_successful = True # will set to false if they PySpin import fails
+# Basic
+        import sys # for making the popups
+        import os # for getting current directory
+    # Timing
+        import time # for timing
+        import threading # to do multiple loops at once
+    # matplotlib
+        import matplotlib.pyplot as plt # for plotting
+        from matplotlib import colors
+    # numbers
+        import numpy as np # for numbers
+        import random # for random numbers 
+                      # (only used to simulate a camera when there's no camera connected)
+# Camera, imaging etc.
+        from PIL import Image # image display
+        try:
+            from pyspin import PySpin # Camera control
+        except:
+            try:
+                import PySpin
+            except:
+                print("FAILURE: COULDN'T IMPORT CAMERA LIBRARY (PySpin)")
+                imports_successful = False
+                
+        from pyflycap2.interface import GUI as cam_GUI # Camera setup GUI
+# Instrument control
+        import pyvisa 
+# Graphical User Interace
+        from PyQt5.QtGui import *
+        from PyQt5.QtWidgets import *
+        from PyQt5.QtCore import *
+# Data management
+        import pandas as pd # data structuring
+        import pyarrow.feather as feather # for data storage
+    
+if imports_successful:
+    print("Imports successful")
+# Enable panning/zooming in graphs
+# %matplotlib inline 
