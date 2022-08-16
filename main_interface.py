@@ -10,7 +10,9 @@ import matplotlib.pyplot as plt # for plotting
 
 import utils
 import popups
+import widgets
 import instruments
+from experiment_actions import Pump_Action, Collect_Action
 
 class Interface(QWidget): 
 
@@ -28,12 +30,12 @@ class Interface(QWidget):
         self.popup.exec()   
     # create the electrometer and translation stage objects
         self.CCD = instruments.CCD.CCD(parent=self)
-        self.ps = instruments.multi_suringe.All_Pumps(port=self.syringe_port, parent=self,diameters=self.diameters)
+        self.ps = instruments.multi_syringe.All_Pumps(port=self.syringe_port, parent=self,diameters=self.diameters)
     # full initialize
-        self.init_vars()
+        self.init_vars(params)
         self.init_general_UI()
         
-    def init_vars(self): #############################################################################################
+    def init_vars(self, params): #############################################################################################
     # data
         self.data = pd.DataFrame({'t': [], 'pics' : [], 'liquid' : [],'run' : []})
         self.saved = True
@@ -119,20 +121,20 @@ class Interface(QWidget):
 
         
     # control layout
-        self.cw = Control_Widget(self)
+        self.cw = widgets.control.Control_Widget(self)
         self.input_layout.addWidget(self.cw.control_widget,0,1)    
         
-        self.input_layout.addWidget(VSeparator(),0,2)       
+        self.input_layout.addWidget(utils.VSeparator(),0,2)       
 
         
     # output layout
-        self.ow = Output_Widget(self)
+        self.ow = widgets.output.Output_Widget(self)
         self.ow.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.input_layout.addWidget(self.ow.output_widget,0,3)  
         
-        self.layout.addWidget(HSeparator(),1,0)       
+        self.layout.addWidget(utils.HSeparator(),1,0)       
         
-        self.pw = Plot_Widget(self)
+        self.pw = widgets.plot.Plot_Widget(self)
         self.pw.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         self.layout.addWidget(self.pw.plot_widget,2,0)       
 
@@ -432,13 +434,13 @@ class Interface(QWidget):
 
     def collect_data(self):
 #         t = gt()
-#         tinit = current_time()
+#         tinit = utils.current_time()
         
 #         pr("Getting status...")
         self.sval =  self.ps.status # get data
 #         pr("Getting tval...")
 #         self.t1 = self.CCD.time()
-        pr("Getting picture...")
+        utils.pr("Getting picture...")
         self.pic, self.dims, [self.t1, self.t2] =  self.CCD.take_picture()
 #         self.pic, self.dims, [self.t1, self.t2] =  [[1,2],[3,4]],[2,2],[gt(), gt()] #self.CCD.take_picture()
 #         self.pic, self.dims, [self.t1, self.t2] =  [[1,2],[3,4]],[2,2],[5,6] #self.CCD.take_picture()
@@ -463,14 +465,14 @@ class Interface(QWidget):
 #         pr("Done with collection...")
         print()#"t={}, dt={}".format(np.round(self.tval,3), np.round(self.t2-self.t1),3))
 #         pr("Last collection...")
-        self.last_collection = gt()
+        self.last_collection = utils.gt()
 #         tint = np.round(gt()-t,2)
 #         print("Displaying...")
 #         self.display_action("Collection (took {} s)".format(tint),t=tinit)
 #         print("Displayed")
         
 #     def collect_data(self):
-#         print("Collection at " + current_time() + ' - ',end='')
+#         print("Collection at " + utils.current_time() + ' - ',end='')
 #         self.tval,self.sval = self.CCD.time(), self.ps.status # get data
 #         self.image, self.vals =  self.CCD.take_picture()
 # #         self.yval = self.CCD.getval() # this has to be last because it takes a while, 
@@ -479,7 +481,7 @@ class Interface(QWidget):
 #                                         'run':self.run_number}], ignore_index = True) # append data    
 #         self.pics.append(self.image)
 #         self.last_collection = gt()
-#         print(current_time())
+#         print(utils.current_time())
 
     def collect_button_signal(self):
         if self.cw.collect_btn.isChecked():
@@ -497,7 +499,7 @@ class Interface(QWidget):
             
             if self.first_collection: # if it's the first time collection has been on, set t0
                 self.first_collection = False
-                self.CCD.t0 = gt()
+                self.CCD.t0 = utils.gt()
                 
             # start the data collection loop
             try:
@@ -537,13 +539,13 @@ class Interface(QWidget):
         
         print("Data period is {}".format(data_period))
         measurements = 0
-        end_time = gt() + total_time
-        last_update = gt()-data_period # the -period is so that it starts immediately
-        while (not self.data_end_now) and gt()<end_time and measurements < total_measurements:
-            if gt()-last_update > data_period:
+        end_time = utils.gt() + total_time
+        last_update = utils.gt()-data_period # the -period is so that it starts immediately
+        while (not self.data_end_now) and utils.gt()<end_time and measurements < total_measurements:
+            if utils.gt()-last_update > data_period:
                 if self.data_end_now:
                     break
-                last_update = gt()
+                last_update = utils.gt()
 #                 thread_do(self.collect_data)
                 self.collect_data()
 
@@ -559,7 +561,7 @@ class Interface(QWidget):
             try:
 #                 print(self.tval)
 #                 self.ow.time_display.setText(timeFormat(self.tval))
-                self.ow.time_display.setText(timeFormat(self.CCD.time()))
+                self.ow.time_display.setText(utils.timeFormat(self.CCD.time()))
             except: pass
 
 
@@ -577,7 +579,7 @@ class Interface(QWidget):
             if self.first_graphing:
                 # initalize the graph
                 self.first_graphing = False
-                self.graph_widget = Image_Widget(self)
+                self.graph_widget = widgets.image.Image_Widget(self)
                 self.pw.plot_layout.addWidget(self.graph_widget,self.pw.row,0,4,0)
 #                 self.graph_widget.setScaledContents(True)
                 plt.ioff()
@@ -607,7 +609,7 @@ class Interface(QWidget):
         last_update = 0
         while not self.graph_end_now:
             if self.last_collection-last_update > 0:
-                last_update = gt()
+                last_update = utils.gt()
 # #                 plt.ioff() # in interactive mode, the graph doesn't display until you x out
 #                 plt.clf() # clear previous graphs
 #                 self.plot_graph()
@@ -634,7 +636,7 @@ class Interface(QWidget):
         
         if dlg.exec():
             filename = dlg.selectedFiles()[0] # the filename the user selects
-            self.save_file_name = excelFormat(filename)
+            self.save_file_name = utils.excelFormat(filename)
             
 #             print(filename)
 #             self.data.to_excel(self.save_file_name) # adds .xlsx if necessary
@@ -667,7 +669,7 @@ class Interface(QWidget):
             if self.last_collection-last_update > 0 and not self.saved:
                 i += 1
                 if i % 3 == 0:
-                    last_update = gt()
+                    last_update = utils.gt()
     #                 self
     #                 self.data.to_excel(self.save_file_name) # adds .xlsx if necessary
                     self.compile_and_save()
@@ -794,17 +796,17 @@ class Interface(QWidget):
 #         self.t.go_to(position=to_num(self.cw.move_loc_input.text()))
 #         self.cw.move_loc_input.setText("")
             
-    def display_command(self, text, t = current_time(), show=False): #########################################################
-        t = current_time()
+    def display_command(self, text, t = utils.current_time(), show=False): #########################################################
+        t = utils.current_time()
         message = t + ": " + text
         if show:
             self.ow.most_recent_command.append(message)
             self.ow.most_recent_command.moveCursor(QTextCursor.End)
         print(message)
         
-    def display_action(self, text, t = current_time(), show=False): #########################################################
+    def display_action(self, text, t = utils.current_time(), show=False): #########################################################
         self.display_command(text, t, show)
-        #         t = current_time()
+        #         t = utils.current_time()
 #         message = t + ": " + text
 #         if show:
 #             self.ow.most_recent_action.append(message)
@@ -813,9 +815,9 @@ class Interface(QWidget):
         
         
 #             self.ow.most_recent_command.setText(text)
-#             self.ow.recent_command_time.setText("executed at " + current_time())
+#             self.ow.recent_command_time.setText("executed at " + utils.current_time())
 #         except:
-#             print("Couldn't display command", text, "at",current_time())
+#             print("Couldn't display command", text, "at",utils.current_time())
 #         if success:
 #             self.most_recent_command.setText(text + " (success)")
 #         else:

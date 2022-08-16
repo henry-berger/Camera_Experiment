@@ -184,15 +184,15 @@ class Control_Widget(QWidget):
         
         
     def manual_pump_control(self):
-        self.mpc_popup = Manual_Control_Popup(self.p)
+        self.mpc_popup = popups.Manual_Control_Popup(self.p)
         self.mpc_popup.show() 
         
     def set_params(self):
-        self.param_popup = Parameter_Popup(self.p)
+        self.param_popup = popups.Parameter_Popup(self.p)
         self.param_popup.show() 
         
     def set_custom(self): 
-        self.custom_run_popup = Custom_Run_Popup(self.p)
+        self.custom_run_popup = popups.Custom_Run_Popup(self.p)
         self.custom_run_popup.show() 
 
     def set_up_camera(self): #############################################################################################

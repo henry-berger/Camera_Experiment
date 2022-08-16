@@ -1,5 +1,5 @@
 import numpy as np
-from syringe import Syringe
+from .syringe import Syringe
 import sys
 sys.path.append('../')
 import utils

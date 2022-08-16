@@ -22,6 +22,6 @@ if __name__ == "__main__":
     params = p.parse_args()
 
     app = utils.start_QApplication()
-    p = GUI(params=params)
+    p = GUI(params=vars(params))
     p.show()
     app.exec()
